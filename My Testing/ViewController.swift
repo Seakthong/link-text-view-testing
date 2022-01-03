@@ -7,19 +7,43 @@
 
 import UIKit
 import SwiftSoup
+import Hero
+import Spring
+import SimpleKeychain
+
+enum KeychainKey: String {
+        
+    // for login flow
+    case pinCode
+    
+    case userProfile
+    case deviceXRegistration
+    
+    case deviceID = "d"
+    case cif = "c"
+    case phone = "p"
+}
 
 class ViewController: UIViewController {
     @IBOutlet var linkTextView: LinkTextView!
     @IBOutlet var textViewHeightConstraint: NSLayoutConstraint!
 
+    @IBOutlet var myLabel: UILabel!
     
+    @IBOutlet weak var uuidLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        uuidLabel.text = "NIL"
+        if let cif = SimpleKeychainHelper.string(forKey: .cif) {
+            uuidLabel.text = cif.isEmpty ? "EMPTY CIF" : cif
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+    }
+
+    func loadHTML() {
         let str = "<p>Are you looking for a program which supports your dream home, personal need and unsecured credit card in one package? Sathapana Bank is here to make your dream come to reality.</p>\n<p>Choose Flexi Lending program with</p>\n<p>• Competitive interest rate</p>\n<p>• Loan amount up to 85%</p>\n<p>• Tenure up to 25 years</p>\n<p>• Easy application process </p>\n<p>• <a href=\"https://www.sathapana.com.kh/minio/user_upload/Loans/Flexi_Lending/URL_Link_-_Lending_Program_Website_Content_EN.pdf\" target=\"_self\">URL link Program Features PDF File ENG Version</a></p>\n"
         do {
             let html = str
@@ -50,9 +74,7 @@ class ViewController: UIViewController {
             print("error")
         }
         textViewHeightConstraint.constant = self.linkTextView.contentSize.height
-
     }
-
 
 }
 
@@ -108,4 +130,19 @@ class LinkTextView: UITextView, UITextViewDelegate {
     func textViewDidChangeSelection(_ textView: UITextView) {
         textView.selectedTextRange = nil
     }
+}
+
+struct SimpleKeychainHelper {
+    static func string(forKey key: KeychainKey) -> String? {
+        return A0SimpleKeychain().string(forKey: key.rawValue)
+    }
+    
+    static func setString(_ string: String, forKey key: KeychainKey) {
+        A0SimpleKeychain().setString(string, forKey: key.rawValue)
+    }
+    
+    static func deleteEntry(forKey key: KeychainKey) {
+        A0SimpleKeychain().deleteEntry(forKey: key.rawValue)
+    }
+    
 }
